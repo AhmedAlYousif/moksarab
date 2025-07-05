@@ -1,0 +1,15 @@
+
+
+tmp/
+.air.toml
+
+.exe
+.dll
+.so
+.dylib
+.test
+.db
+
+moksarab
+
+.env
