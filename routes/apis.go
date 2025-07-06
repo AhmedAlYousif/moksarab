@@ -29,6 +29,12 @@ func createWorkspace(c *fiber.Ctx) error {
 			"message": parsingError.Error(),
 		})
 	}
+	if reqBody.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Bad Request",
+			"message": "workspace name cannot be empty.",
+		})
+	}
 
 	var id int64
 	insertError := database.Db.QueryRowContext(c.Context(), "INSERT INTO workspace (name, description) VALUES (?, ?) RETURNING id",
@@ -110,12 +116,12 @@ func createNewMock(c *fiber.Ctx) error {
 		})
 	}
 
-	// if !isValidPath(reqBody.Path) || !isValidHttpMethod(reqBody.Method) || !isValidHttpResponseStatus(reqBody.Status) {
-	// 	return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-	// 		"error":   "Bad Request",
-	// 		"message": "Path, Method, and Status must be vaild",
-	// 	})
-	// }
+	if !isValidPath(reqBody.Path) || !isValidHttpMethod(strings.ToUpper(reqBody.Method)) || !isValidHttpResponseStatus(reqBody.Status) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Bad Request",
+			"message": "Path, Method, and Status must be vaild",
+		})
+	}
 
 	transaction, err := database.Db.BeginTx(c.Context(), nil)
 	if err != nil {
@@ -143,7 +149,7 @@ func createNewMock(c *fiber.Ctx) error {
 	_, err = transaction.Exec("INSERT INTO route_response (status, path, method, response) VALUES (?, ?, ?, ?)",
 		reqBody.Status,
 		lastInseretedId.Int64,
-		reqBody.Method,
+		strings.ToUpper(reqBody.Method),
 		mockedResponseBody,
 	)
 	if err != nil {
@@ -209,6 +215,24 @@ func insertPartReturningIdOrGetExistingRouteId(transaction *sql.Tx, part string,
 	}
 
 	return &id, nil
+}
+
+var validPath = regexp.MustCompile(`^/?([a-zA-Z0-9_\-:]+/?)*$`)
+
+func isValidPath(path string) bool {
+	return validPath.MatchString(path)
+}
+
+func isValidHttpMethod(method string) bool {
+	switch method {
+	case "GET", "POST", "PUT", "DELETE", "PATCH", "HEAD", "OPTIONS", "CONNECT", "TRACE":
+		return true
+	}
+	return false
+}
+
+func isValidHttpResponseStatus(statusCode int) bool {
+	return statusCode >= 100 && statusCode <= 599
 }
 
 type GetMocksResponse struct {
@@ -327,6 +351,13 @@ func createMockResponse(c *fiber.Ctx) error {
 		})
 	}
 
+	if !isValidHttpMethod(strings.ToUpper(reqBody.Method)) || !isValidHttpResponseStatus(reqBody.Status) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":   "Bad Request",
+			"message": "HTTP method and response status must be valid",
+		})
+	}
+
 	if !reqBody.PathParams.Valid {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error":   "Bad Request",
@@ -337,7 +368,7 @@ func createMockResponse(c *fiber.Ctx) error {
 	_, err = database.Db.ExecContext(c.Context(), "INSERT INTO route_response (path, path_params, method, status, response) VALUES (?, ?, ?, ?, ?)",
 		mockId,
 		reqBody.PathParams,
-		reqBody.Method,
+		strings.ToUpper(reqBody.Method),
 		reqBody.Status,
 		reqBody.Response,
 	)
