@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"fmt"
+	"moksarab/config"
 	"moksarab/database"
 	"moksarab/models"
 	"regexp"
@@ -13,11 +14,17 @@ import (
 )
 
 func RegisterAPIRoutes(router fiber.Router) {
-	router.Post("/workspaces", createWorkspace)
-	router.Get("/workspaces", getWorkspaces)
-	router.Post("/workspaces/:workspaceId/mocks", createNewMock)
-	router.Get("/workspaces/:workspaceId/mocks", getMocks)
-	router.Post("/workspaces/:workspaceId/mocks/:mockId", createMockResponse)
+	if config.WorkspaceEnabled {
+		router.Post("/workspaces", createWorkspace)
+		router.Get("/workspaces", getWorkspaces)
+		router.Post("/workspaces/:workspaceId/mocks", createNewMock)
+		router.Get("/workspaces/:workspaceId/mocks", getMocks)
+		router.Post("/workspaces/:workspaceId/mocks/:mockId", createMockResponse)
+	} else {
+		router.Post("/mocks", createNewMock)
+		router.Get("/mocks", getMocks)
+		router.Post("/mocks/:mockId", createMockResponse)
+	}
 }
 
 func createWorkspace(c *fiber.Ctx) error {
@@ -98,13 +105,15 @@ type CreateNewMockRequest struct {
 
 func createNewMock(c *fiber.Ctx) error {
 
-	var workspaceId int
-	var err error
-	if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Bad Request",
-			"message": "workspaceId must be valid integer",
-		})
+	workspaceId := 4269
+	if config.WorkspaceEnabled {
+		var err error
+		if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "Bad Request",
+				"message": "workspaceId must be valid integer",
+			})
+		}
 	}
 	log.Debugf("Creating a new mock in workspace %d", workspaceId)
 	var reqBody *CreateNewMockRequest
@@ -247,13 +256,15 @@ type GetMocksResponse struct {
 
 func getMocks(c *fiber.Ctx) error {
 
-	var workspaceId int
-	var err error
-	if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Bad Request",
-			"message": "workspaceId must be valid integer",
-		})
+	workspaceId := 4269
+	if config.WorkspaceEnabled {
+		var err error
+		if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "Bad Request",
+				"message": "workspaceId must be valid integer",
+			})
+		}
 	}
 
 	rows, err := database.Db.QueryContext(c.Context(), `	
@@ -326,14 +337,16 @@ func getMocks(c *fiber.Ctx) error {
 }
 
 func createMockResponse(c *fiber.Ctx) error {
-	var workspaceId int
+	workspaceId := 4269
 	var mockId int
 	var err error
-	if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Bad Request",
-			"message": "workspaceId must be valid integer",
-		})
+	if config.WorkspaceEnabled {
+		if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "Bad Request",
+				"message": "workspaceId must be valid integer",
+			})
+		}
 	}
 	if mockId, err = c.ParamsInt("mockId", -1); err != nil || mockId == -1 {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{

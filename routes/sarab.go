@@ -3,6 +3,7 @@ package routes
 import (
 	"database/sql"
 	"fmt"
+	"moksarab/config"
 	"moksarab/database"
 	"regexp"
 	"slices"
@@ -20,7 +21,7 @@ FROM route_response rr
 	JOIN route r1 ON r1.id = rr.path AND (r1.path = '/1' OR r1.is_param = 1)
 	JOIN route r0 ON r0.id = r1.parent_path AND (r0.path = '/test' OR r0.is_param = 1)
 WHERE rr.method = 'GET'
-	AND r1.workspace = 1
+	AND r1.workspace = 4269
 ORDER BY rr.path_params IS NULL, rr.path_params;
 */
 
@@ -32,13 +33,15 @@ type SarabResponse struct {
 }
 
 func HandleSarabRequests(c *fiber.Ctx) error {
-	var workspaceId int
-	var err error
-	if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error":   "Bad Request",
-			"message": "workspaceId must be valid integer",
-		})
+	workspaceId := 4269
+	if config.WorkspaceEnabled {
+		var err error
+		if workspaceId, err = c.ParamsInt("workspaceId", -1); err != nil || workspaceId == -1 {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+				"error":   "Bad Request",
+				"message": "workspaceId must be valid integer",
+			})
+		}
 	}
 	re := regexp.MustCompile(`^/sarab/\d+`)
 	trimmedPath := re.ReplaceAllString(c.Path(), "")

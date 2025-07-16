@@ -1,6 +1,7 @@
 package main
 
 import (
+	"moksarab/config"
 	"moksarab/database"
 	"moksarab/routes"
 
@@ -19,7 +20,13 @@ func InitilizeMocSarabServer() *fiber.App {
 		AppName:       "MokSarab Mock Server v" + Version,
 	})
 
-	sarab := app.Use("/sarab/:workspaceId/*", routes.HandleSarabRequests)
+	var sarab fiber.Router
+	if config.WorkspaceEnabled {
+		sarab = app.Use("/sarab/:workspaceId/*", routes.HandleSarabRequests)
+	} else {
+		sarab = app.Use("/sarab/*", routes.HandleSarabRequests)
+	}
+
 	api := app.Group("/api")
 	// ui := app.Group("/")
 

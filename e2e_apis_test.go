@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"moksarab/config"
 	"moksarab/database"
 	"moksarab/models"
 	"moksarab/routes"
@@ -23,6 +24,7 @@ const BASE_URL = "http://localhost:" + PORT
 var errCh chan error
 
 func beforeEach() *fiber.App {
+	config.WorkspaceEnabled = true
 	database.InitilizeDatabase()
 
 	errCh = make(chan error, 1)
