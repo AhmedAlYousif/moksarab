@@ -74,6 +74,7 @@ func getWorkspaces(c *fiber.Ctx) error {
 	if selectError != nil {
 		return HandleSQLErrors(c, selectError)
 	}
+	defer rows.Close()
 	var workspaces []models.Workspace
 	for rows.Next() {
 		var workspace models.Workspace
@@ -321,6 +322,7 @@ func getMocks(c *fiber.Ctx) error {
 	if err != nil {
 		return HandleSQLErrors(c, err)
 	}
+	defer rows.Close()
 
 	var mocks []GetMocksResponse
 
