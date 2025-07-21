@@ -52,23 +52,12 @@ jobs:
       - name: Build binaries
         run: |
           mkdir -p dist
-          for GOOS in linux windows; do
-            for GOARCH in amd64 arm64; do
-              EXT=""
-              [ "$GOOS" = "windows" ] && EXT=".exe"
-              ARCH="$GOARCH"
-              [ "$GOARCH" = "amd64" ] && ARCH="x86_64"
-              OS="$GOOS"
-              [ "$GOOS" = "darwin" ] && OS="macos"
-              OUT="dist/moksarab-${OS}-${ARCH}_v${VERSION}${EXT}"
-              if [ "$GOOS" = "windows" ]; then
-                CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=${VERSION}'" -o $OUT
-              else
-                GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=${VERSION}'" -o $OUT
-              fi
-            done
-          done
-      - name: Release
+          # Linux x86_64
+          GOOS=linux GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-x86_64_v${VERSION}
+          # Linux arm64
+          GOOS=linux GOARCH=arm64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-arm64_v${VERSION}
+          # Windows x86_64 (cgo enabled)
+          CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-windows-x86_64_v${VERSION}.exe      - name: Release
         uses: softprops/action-gh-release@v2
         with:
           files: dist/*

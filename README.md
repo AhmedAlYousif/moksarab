@@ -14,7 +14,6 @@
    - `moksarab-linux-x86_64`
    - `moksarab-linux-arm64`
    - `moksarab-windows-x86_64.exe`
-   - `moksarab-windows-arm64.exe`
 
 3. (Linux) Make the binary executable:
    ```sh
@@ -24,7 +23,7 @@
 
 > **Note:**  
 > - `x86_64` = 64-bit Intel/AMD CPUs  
-> - `arm64` = 64-bit ARM CPUs (Apple Silicon, Windows ARM laptops, some Linux devices)  
+> - `arm64` = 64-bit ARM CPUs (Apple Silicon, some Linux devices)  
 > - `windows` = Microsoft Windows  
 > - `linux` = Linux distributions
 
@@ -44,14 +43,12 @@ export SQLITE_DB_PATH=./moksarab.db
 ./moksarab-linux-x86_64
 ```
 
-Example (Windows, PowerShell, x86_64 or arm64):
+Example (Windows, PowerShell, x86_64):
 ```powershell
 $env:PORT="8080"
 $env:WORKSPACE_ENABLED="true"
 $env:SQLITE_DB_PATH="./moksarab.db"
 .\moksarab-windows-x86_64.exe
-# or for ARM64
-.\moksarab-windows-arm64.exe
 ```
 
 ### Running
