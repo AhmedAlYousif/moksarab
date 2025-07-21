@@ -58,8 +58,9 @@ jobs:
           GOOS=linux GOARCH=arm64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-arm64_v${VERSION}
           # Windows x86_64 (cgo enabled)
           CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-windows-x86_64_v${VERSION}.exe      - name: Release
-      uses: softprops/action-gh-release@v2
-      with:
-        files: dist/*
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
