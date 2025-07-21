@@ -46,18 +46,28 @@ jobs:
           fi
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
+      - name: Install mingw-w64 for Windows cgo
+        run: sudo apt-get update && sudo apt-get install -y mingw-w64
+
       - name: Build binaries
         run: |
           mkdir -p dist
-          for GOOS in linux windows darwin; do
+          for GOOS in linux windows; do
             for GOARCH in amd64 arm64; do
               EXT=""
               [ "$GOOS" = "windows" ] && EXT=".exe"
-              OUT="dist/moksarab-${GOOS}-${GOARCH}${EXT}"
-              GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=${VERSION}'" -o $OUT
+              ARCH="$GOARCH"
+              [ "$GOARCH" = "amd64" ] && ARCH="x86_64"
+              OS="$GOOS"
+              [ "$GOOS" = "darwin" ] && OS="macos"
+              OUT="dist/moksarab-${OS}-${ARCH}_v${VERSION}${EXT}"
+              if [ "$GOOS" = "windows" ]; then
+                CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=${VERSION}'" -o $OUT
+              else
+                GOOS=$GOOS GOARCH=$GOARCH go build -ldflags "-X 'main.Version=${VERSION}'" -o $OUT
+              fi
             done
           done
-
       - name: Release
         uses: softprops/action-gh-release@v2
         with:

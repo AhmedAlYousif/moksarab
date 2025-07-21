@@ -15,9 +15,8 @@
    - `moksarab-linux-arm64`
    - `moksarab-windows-x86_64.exe`
    - `moksarab-windows-arm64.exe`
-   - `moksarab-macos-x86_64`
-   - `moksarab-macos-arm64`
-3. (Linux/macOS) Make the binary executable:
+
+3. (Linux) Make the binary executable:
    ```sh
    chmod +x moksarab-<your-os>-<your-arch>
    ```
@@ -26,7 +25,6 @@
 > **Note:**  
 > - `x86_64` = 64-bit Intel/AMD CPUs  
 > - `arm64` = 64-bit ARM CPUs (Apple Silicon, Windows ARM laptops, some Linux devices)  
-> - `macos` = macOS (Apple desktop/laptop)  
 > - `windows` = Microsoft Windows  
 > - `linux` = Linux distributions
 
@@ -38,7 +36,7 @@ Set environment variables as needed before running the executable:
 - `WORKSPACE_ENABLED`: Set to `true` to enable workspace support (default: `false`)
 - `SQLITE_DB_PATH`: Path to the SQLite database file (default is in-memory if not set)
 
-Example (Linux/macOS):
+Example (Linux):
 ```sh
 export PORT=8080
 export WORKSPACE_ENABLED=true
