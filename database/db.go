@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"moksarab/config"
 	"moksarab/models"
-	"os"
 	"strings"
 
 	"github.com/gofiber/fiber/v2/log"
@@ -14,17 +13,17 @@ import (
 var Db *sql.DB
 
 func InitilizeDatabase() {
-	dbPath := os.Getenv("SQLITE_DB_PATH")
-	if dbPath == "" {
-		dbPath = ":memory:"
+
+	if config.DbPath == "" {
+		config.DbPath = ":memory:"
 		log.Debug("Opening sqlite in-memory database (default, SQLITE_DB_PATH not set)")
-	} else if strings.Contains(dbPath, ":memory:") {
-		log.Debugf("Opening sqlite in-memory database (SQLITE_DB_PATH=%s)", dbPath)
+	} else if strings.Contains(config.DbPath, ":memory:") {
+		log.Debugf("Opening sqlite in-memory database (SQLITE_DB_PATH=%s)", config.DbPath)
 	} else {
-		log.Debugf("Opening sqlite database at path: %s", dbPath)
+		log.Debugf("Opening sqlite database at path: %s", config.DbPath)
 	}
 
-	db, err := sql.Open("sqlite3", dbPath)
+	db, err := sql.Open("sqlite3", config.DbPath)
 	if err != nil {
 		log.Fatalf("Could not open sqlite database: %v", err)
 	}

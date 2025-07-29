@@ -13,3 +13,7 @@ tmp/
 moksarab
 
 .env
+
+dev.sh
+plan.md
+local.db

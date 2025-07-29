@@ -53,11 +53,11 @@ jobs:
         run: |
           mkdir -p dist
           # Linux x86_64
-          GOOS=linux GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-x86_64_v${VERSION}
+          GOOS=linux GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-x86_64_${VERSION}
           # Linux arm64
-          GOOS=linux GOARCH=arm64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-arm64_v${VERSION}
+          GOOS=linux GOARCH=arm64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-linux-arm64_${VERSION}
           # Windows x86_64 (cgo enabled)
-          CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-windows-x86_64_v${VERSION}.exe
+          CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc GOOS=windows GOARCH=amd64 go build -ldflags "-X 'main.Version=${VERSION}'" -o dist/moksarab-windows-x86_64_${VERSION}.exe
 
       - name: Release
         uses: softprops/action-gh-release@v2

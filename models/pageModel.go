@@ -19,6 +19,6 @@ func PageOf[T any](content []T, pageNumber int, pageSize int, totalElements int)
 		TotalElements: totalElements,
 		TotalPages:    totalPages,
 		First:         pageNumber == 0,
-		Last:          (pageNumber + 1) == totalPages,
+		Last:          (pageNumber + 1) >= totalPages,
 	}
 }

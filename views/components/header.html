@@ -1,0 +1,99 @@
+<header class="bg-white dark:bg-gray-900">
+	<nav class="mx-auto flex max-w-7xl items-center justify-between p-6 lg:px-8">
+		<div class="flex lg:flex-1">
+			<a href="/" class="-m-1.5 p-1.5">
+				<span>MokSarab</span>
+			</a>
+		</div>
+		<div class="flex gap-x-12">
+			<details class="relative">
+				<summary
+					class="flex items-center gap-x-1 text-sm/6 font-semibold text-gray-900 dark:text-white cursor-pointer">
+					Workspaces
+					<svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true"
+						class="size-5 flex-none text-gray-400 dark:text-white">
+						<path
+							d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+							clip-rule="evenodd" fill-rule="evenodd" />
+					</svg>
+				</summary>
+				<div hx-get="/api/workspaces" hx-trigger="load" hx-swap="innerHTML">
+					<span>Loading...</span>
+				</div>
+			</details>
+		</div>
+	</nav>
+</header>
+<dialog id="createWorkspaceDialog" class="max-w-md w-full border-0 p-0 rounded-lg shadow-xl">
+	<div class="flex items-center justify-center min-h-[300px] min-w-[300px] w-full">
+		<form id="create-workspace"
+			class="w-full bg-white dark:bg-gray-900 p-6 flex flex-col gap-4 text-gray-900 dark:text-white"
+			method="dialog" hx-post="/api/workspaces" hx-swap="none" autocomplete="off"
+			hx-on:change="document.getElementById('create-workspace-error').textContent = ''">
+			<h2 class="text-lg font-bold mb-2">Create Workspace</h2>
+			<label class="flex flex-col gap-1">
+				<span class="font-medium">Name</span>
+				<input name="name" required
+					class="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500 bg-gray-50 dark:bg-gray-800 dark:text-white"
+					placeholder="Workspace name" />
+			</label>
+			<label class="flex flex-col gap-1">
+				<span class="font-medium">Description</span>
+				<textarea name="description" rows="3"
+					class="border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-500 bg-gray-50 dark:bg-gray-800 dark:text-white"
+					placeholder="Optional description"></textarea>
+			</label>
+			<div class="flex justify-end gap-2 mt-4">
+				<button type="button"
+					class="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-white"
+					onclick="createWorkspaceDialog.close()">Cancel</button>
+				<button type="submit" class="px-4 py-2 rounded bg-blue-600 text-white font-semibold">Create</button>
+			</div>
+			<div id="create-workspace-error" class="text-red-600 text-sm mb-2"></div>
+		</form>
+	</div>
+</dialog>
+<script>
+	const dialog = document.getElementById("createWorkspaceDialog");
+	document.addEventListener('click', function (event) {
+		document.querySelectorAll('details[open]').forEach(function (details) {
+			if (!details.contains(event.target)) {
+				details.open = false;
+			}
+		});
+		if (event.target === dialog) {
+			dialog.close();
+		}
+	});
+	document.addEventListener('htmx:responseError', function (event) {
+		const sourceId = event?.target?.id;
+		if (sourceId) {
+			const errorId = `${sourceId}-error`;
+			const errorContainer = document.getElementById(errorId);
+			if (errorContainer) {
+				errorContainer.textContent = JSON.parse(event.detail?.xhr?.response ?? "{}")?.message;
+			}
+		}
+	});
+</script>
+
+{{ define "workspaceList" }}
+<ul hx-on:click="this.closest('details').open = false;"
+	class="absolute left-0 mt-2 w-48 rounded-md bg-white dark:bg-gray-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+	{{ range .Page.Content }}
+	<li><a href="/workspaces/{{.Id}}"
+			class="block px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">{{.Name}}</a>
+	</li>
+	{{ else }}
+	<li><em class="block px-4 py-2 text-sm text-gray-700 dark:text-white">No Workspaces found</em></li>
+	{{ end }}
+	{{ if not .Page.Last }}
+	<li><a href="/workspaces"
+			class="block px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">Show
+			All Worksaces</a></li>
+	{{ end }}
+	<li><a hx-on:click="createWorkspaceDialog.showModal(); this.closest('details').open = false;"
+			class="block px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700">+ New
+			Workspace</a></li>
+</ul>
+{{ end }}

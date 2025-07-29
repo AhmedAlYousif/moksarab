@@ -51,7 +51,9 @@ func createWorkspace(c *fiber.Ctx) error {
 	if insertError != nil {
 		return HandleSQLErrors(c, insertError)
 	}
-
+	if c.Get("HX-Request", "false") == "true" {
+		c.Set("HX-Redirect", fmt.Sprintf("/workspaces/%d", id))
+	}
 	c.Location(fmt.Sprintf("/workspaces/%d", id))
 	return c.SendStatus(fiber.StatusCreated)
 }
@@ -93,6 +95,10 @@ func getWorkspaces(c *fiber.Ctx) error {
 	}
 
 	pageResponse := models.PageOf(workspaces, pageNumber, pageSize, totalElements)
+
+	if c.Get("HX-Request", "false") == "true" {
+		return c.Render("workspaceList", fiber.Map{"Page": pageResponse})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(pageResponse)
 }
